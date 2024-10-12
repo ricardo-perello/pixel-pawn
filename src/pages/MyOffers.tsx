@@ -1,81 +1,55 @@
-import { useSuiClientQuery, useCurrentAccount } from '@mysten/dapp-kit';
-import Navbar from '../components/Navbar'; // Import your Navbar component
+// src/pages/MyOffers.tsx
+import React, { useEffect, useState } from 'react';
+import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
+import OfferCard from '../components/OfferCard';
 
-const PACKAGE_ID = 0x0
+const MyOffers = () => {
+  const currentAccount = useCurrentAccount();
+  const suiClient = useSuiClient();
+  const [offers, setOffers] = useState([]);
 
-// Custom hook to fetch offers
-const useFetchOffers = () => {
-  const account = useCurrentAccount();
+  useEffect(() => {
+    const fetchOffers = async () => {
+      if (currentAccount?.address) {
+        try {
+          // Fetch offers where the user is the borrower
+          const response = await suiClient.getOwnedObjects({
+            owner: currentAccount.address,
+            filter: {
+              StructType: `${process.env.REACT_APP_PACKAGE_ID}::pixel_pawn::Offer`,
+            },
+            options: {
+              showContent: true,
+            },
+          });
+          setOffers(response.data);
+        } catch (error) {
+          console.error('Error fetching offers:', error);
+        }
+      }
+    };
 
-  if (!account) {
-    return { data: [], isLoading: false, isError: false }; // Return empty data if no account is connected
+    fetchOffers();
+  }, [currentAccount, suiClient]);
+
+  if (!currentAccount) {
+    return <div className="p-4">Please connect your wallet to view your offers.</div>;
   }
 
-  // Query to fetch OfferPTB structs where the pawner is the connected account
-  const { data, isLoading, isError, error, refetch } = useSuiClientQuery(
-    'getOwnedObjects', // This should match your Move function name
-    {
-      owner: account.address,
-      // The filter condition is specific to your implementation
-      filter: {
-        MatchAll: [
-          {
-            StructType: `${PACKAGE_ID}::pixelpawn::OfferPTB`, // Specify the struct type
-          },
-        ],
-      },
-      options: {
-        showContent: true,
-        showDisplay: true,
-        showType: true,
-      },
-    },
-    { queryKey: ['OffersPTB'] }, // Optional query key for caching
-  );
-
-  return {
-    data: data && data.data.length > 0 ? data.data : [], // Return the fetched data
-    isLoading,
-    isError,
-    error,
-    refetch,
-  };
-};
-console.log(useFetchOffers)
-const myOffers = () => {
-  const { data: offers, isLoading, isError, error, refetch } = useFetchOffers();
-
   return (
-    <div className="min-h-screen bg-base-200">
-      <Navbar />
-      <main className="container mx-auto px-4 py-8 mt-16">
-        <section className="hero bg-base-100 rounded-lg shadow-md mb-8">
-          <body>Here are all the NFTs you have put up on offer</body>
-        </section>
-        <section>
-          {isLoading && <p>Loading offers...</p>}
-          {isError && <p>Error fetching offers: {error.message}</p>}
-          {offers.length > 0 ? (
-            offers.map((offer) => (
-              <div key={offer.nft_id} className="offer-card p-4 border rounded mb-4">
-                <h3>NFT ID: {offer.content.fields.id}</h3>
-                <p>Pawner: {offer.pawner}</p>
-                <p>Lender: {offer.lender}</p>
-                <p>Loan Amount: {offer.loan_amount}</p>
-                <p>Interest Rate: {offer.interest_rate}%</p>
-                <p>Duration: {offer.duration} ms</p>
-                <p>Loan Status: {offer.loan_status}</p>
-                <p>Repayment Status: {offer.repayment_status}</p>
-              </div>
-            ))
-          ) : (
-            <p>No offers found.</p>
-          )}
-          <button onClick={refetch} className="btn btn-secondary mt-4"> Refresh Offers</button>
-        </section>
-      </main>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">My Offered NFTs</h1>
+      {offers.length === 0 ? (
+        <p>You don't have any offered NFTs.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {offers.map((offer) => (
+            <OfferCard key={offer.data.objectId} offer={offer} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default myOffers;
+export default MyOffers;

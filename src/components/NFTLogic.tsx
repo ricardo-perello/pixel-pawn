@@ -2,7 +2,6 @@ import { useResolveSuiNSName } from '@mysten/dapp-kit';
 import { useSuiClientQuery } from '@mysten/dapp-kit';
 import { ConnectModal, useCurrentAccount } from '@mysten/dapp-kit';
 import Navbar from '../components/Navbar'; // Import your Navbar component
-import { Box, Container, Flex, Heading } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 
 
