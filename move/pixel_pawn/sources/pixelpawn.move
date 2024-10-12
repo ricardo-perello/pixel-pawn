@@ -93,45 +93,46 @@ module pixelpawn::pixelpawn{
     }
 
     public entry fun repay_loan(
-        offer_id: u64,
+        pix: &mut PixelPawn,
+        nft_id: ID,
+        clock: &Clock,
         ctx: &mut TxContext,
     ) {
         let pawner = tx_context::sender(ctx);
-        let offer = self.offers.get_mut(&offer_id).expect("Offer not found");
-        assert!(offer.loan_status == 1, "Loan not active");
-        assert!(pawner == offer.pawner, "Only pawner can repay");
-        let current_time = tx_context::timestamp(ctx);
-        assert!(current_time <= offer.timestamp + offer.duration, "Loan duration expired");
+        let offer = pix.offers.borrow_mut(nft_id);
+        assert!(offer.loan_status == 1);
+        assert!(pawner == offer.pawner);
+        let current_time = clock.timestamp_ms();
+        assert!(current_time <= offer.timestamp + offer.duration);
         // Calculate repayment amount
         let interest = calculate_interest(offer.loan_amount, offer.interest_rate);
         let total_due = offer.loan_amount + interest;
         let platform_fee = calculate_platform_fee(interest);
         let lender_amount = total_due - platform_fee;
         // Transfer repayment from pawner to lender and platform fee to shop owner
-        transfer_sui_from_sender(total_due, ctx);
-        transfer_sui(self_address, offer.lender.unwrap(), lender_amount);
-        transfer_sui(self_address, self.shop_owner, platform_fee);
+        //TODO transfer the money
         // Unlock NFT and return to pawner
-        kiosk::take(&mut self.kiosk, &self.kiosk_owner_cap, offer.nft_id);
-        transfer_nft(self_address, pawner, offer.nft_id);
+        remove_nft(nft_id, pix, ctx);
+        
         // Update offer
         offer.loan_status = 2; // Finished
         offer.repayment_status = 1; // Repaid
     }
 
     public entry fun claim_nft(
-        offer_id: u64,
+        pix: &mut PixelPawn,
+        nft_id: ID,
+        clock: &Clock,
         ctx: &mut TxContext,
     ) {
         let lender = tx_context::sender(ctx);
-        let offer = self.offers.get_mut(&offer_id).expect("Offer not found");
-        assert!(offer.loan_status == 1, "Loan not active");
-        assert!(Some(lender) == offer.lender, "Only lender can claim NFT");
-        let current_time = tx_context::timestamp(ctx);
-        assert!(current_time > offer.timestamp + offer.duration, "Loan duration not expired");
+        let offer = pix.offers.borrow_mut(nft_id);
+        assert!(offer.loan_status == 1);
+        assert!(lender == offer.lender);
+       let current_time = clock.timestamp_ms();
+        assert!(current_time > offer.timestamp + offer.duration);
         // Transfer NFT to lender
-        kiosk::take(&mut self.kiosk, &self.kiosk_owner_cap, offer.nft_id);
-        transfer_nft(self_address, lender, offer.nft_id);
+        //TODO transfer the NFT
         // Update offer
         offer.loan_status = 2; // Finished
         offer.repayment_status = 2; 
