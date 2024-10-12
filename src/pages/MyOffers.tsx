@@ -1,7 +1,7 @@
 import { useSuiClientQuery, useCurrentAccount } from '@mysten/dapp-kit';
 import Navbar from '../components/Navbar'; // Import your Navbar component
 
-const PACKAGE_ID = 0x0
+const PACKAGE_ID = 0x0;
 
 // Custom hook to fetch offers
 const useFetchOffers = () => {
@@ -20,7 +20,7 @@ const useFetchOffers = () => {
       filter: {
         MatchAll: [
           {
-            StructType: `${PACKAGE_ID}::pixelpawn::OfferPTB`, // Specify the struct type
+            StructType: `${PACKAGE_ID}::pixelpawn::Offer`, // Specify the struct type
           },
         ],
       },
@@ -41,16 +41,18 @@ const useFetchOffers = () => {
     refetch,
   };
 };
-console.log(useFetchOffers)
-const myOffers = () => {
+
+const MyOffers = () => {
   const { data: offers, isLoading, isError, error, refetch } = useFetchOffers();
+  
 
   return (
     <div className="min-h-screen bg-base-200">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 mt-16">
+      <div className="h-24"></div> {20}{20}
+      <main className="container mx-auto px-4 py-8 mt-8"> {100}{100}
         <section className="hero bg-base-100 rounded-lg shadow-md mb-8">
-          <body>Here are all the NFTs you have put up on offer</body>
+          <h2>Here are all the NFTs you have put up on offer</h2>
         </section>
         <section>
           {isLoading && <p>Loading offers...</p>}
@@ -71,11 +73,11 @@ const myOffers = () => {
           ) : (
             <p>No offers found.</p>
           )}
-          <button onClick={refetch} className="btn btn-secondary mt-4"> Refresh Offers</button>
+          <button onClick={refetch} className="btn btn-secondary mt-8"> Refresh Offers</button>
         </section>
       </main>
     </div>
   );
 };
 
-export default myOffers;
+export default MyOffers;
