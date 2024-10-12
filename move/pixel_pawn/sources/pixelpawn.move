@@ -115,27 +115,27 @@ module pixelpawn::pixelpawn{
         return offer.pawner
     }
 
-    public fun get_lender(offer: Offer): address {
+    public fun get_lender(offer: &Offer): address {
         return offer.lender
     }
 
-    public fun get_loan_amount(offer: Offer): u64 {
+    public fun get_loan_amount(offer: &Offer): u64 {
         return offer.loan_amount
     }
 
-    public fun get_interest_rate(offer: Offer): u64 {
+    public fun get_interest_rate(offer: &Offer): u64 {
         return offer.interest_rate
     }
 
-    public fun get_duration(offer: Offer): u64 {
+    public fun get_duration(offer: &Offer): u64 {
         return offer.duration
     }
 
-    public fun get_timestamp(offer: Offer): u64 {
+    public fun get_timestamp(offer: &Offer): u64 {
         return offer.timestamp
     }
 
-    public fun get_loan_status(offer: Offer): u8 {
+    public fun get_loan_status(offer: &Offer): u8 {
         return offer.loan_status
     }
    
