@@ -4,7 +4,6 @@ import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
 import NFTCard from '../components/NFTCard';
 import type { SuiObjectResponse } from '@mysten/sui/client';
 
-
 const MyNFTs = () => {
   const currentAccount = useCurrentAccount();
   const suiClient = useSuiClient();
@@ -33,21 +32,19 @@ const MyNFTs = () => {
   if (!currentAccount) {
     return <div className="p-4">Please connect your wallet to view your NFTs.</div>;
   }
-  
+
+  // Filter out NFTs where data is undefined or null
   const validNfts = nfts.filter((nft) => nft.data != null);
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">My NFTs</h1>
-      {nfts.length === 0 ? (
+      {validNfts.length === 0 ? (
         <p>You don't have any NFTs.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            
-          {
-          
-          nfts.map((nft) => (
-            <NFTCard key={validNfts.values} nft={nft} />
+          {validNfts.map((nft) => (
+            <NFTCard key={nft.data!.objectId} nft={nft} />
           ))}
         </div>
       )}

@@ -16,7 +16,7 @@ const MyOffers = () => {
           const response = await suiClient.getOwnedObjects({
             owner: currentAccount.address,
             filter: {
-              StructType: `${process.env.REACT_APP_PACKAGE_ID}::pixel_pawn::Offer`,
+              StructType: `${PACKAGE_ID}::pixel_pawn::Offer`,
             },
             options: {
               showContent: true,

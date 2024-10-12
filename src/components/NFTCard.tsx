@@ -2,18 +2,20 @@
 import React from 'react';
 import { Transaction } from '@mysten/sui/transactions';
 import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
+import { PACKAGE_ID } from '../constants';
+
 
 const NFTCard = ({ nft }) => {
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const suiClient = useSuiClient();
 
-  const pawnNFT = () => {
+  const pawnNFT = (loanAmount : number , duration : number) => {
     const tx = new Transaction();
     tx.moveCall({
-      target: `${process.env.REACT_APP_PACKAGE_ID}::pixel_pawn::create_offer`,
-      arguments: [tx.object(nft.data.objectId), tx.pure(loanAmount), tx.pure(duration)],
+      target: `${PACKAGE_ID}::pixel_pawn::create_offer`,
+      arguments: [tx.object(nft.data.objectId), tx.pure(, loanAmount), tx.pure(duration, 'u64')], 
     });
-
+    
     signAndExecute(
       {
         transaction: tx,
