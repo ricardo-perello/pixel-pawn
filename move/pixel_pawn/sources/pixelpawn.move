@@ -90,7 +90,7 @@ module pixelpawn::pixelpawn{
         assert!(offer.pawner == pawner);
          
         let Offer {
-            nft_id:_,
+            nft_id,
             pawner:_,
             lender:_,
             loan_amount:_,
@@ -146,9 +146,9 @@ module pixelpawn::pixelpawn{
         
         // delete offer;
         let Offer {
-            nft_id:_,
+            nft_id,
             pawner:_,
-            lender:_,
+            lender,
             loan_amount:_,
             interest_rate:_,
             duration:_,
@@ -160,7 +160,7 @@ module pixelpawn::pixelpawn{
         transfer::public_transfer(nft, pawner);
 
         // Transfer repayment from pawner to lender and platform fee to shop owner
-        pay::split_and_transfer(coins, lender_amount, offer.lender, ctx);
+        pay::split_and_transfer(coins, lender_amount, lender, ctx);
         pay::split_and_transfer(coins, platform_fee, pix.owner, ctx);
     }
 
