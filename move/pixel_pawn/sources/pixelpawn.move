@@ -107,11 +107,11 @@ module pixelpawn::pixelpawn{
     }
 
     //Offer Getters
-    public fun get_nft_id(offer: Offer): ID {
+    public fun get_nft_id(offer: &Offer): ID {
         return offer.nft_id
     }
 
-    public fun get_pawner(offer: Offer): address {
+    public fun get_pawner(offer: &Offer): address {
         return offer.pawner
     }
 

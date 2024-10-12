@@ -39,7 +39,8 @@ module pixelpawn::tests {
         let nft_id = object::id(&nft);
         assert!(pix.get_offers_size() == 1);
 
-        let offer = scenario.take_from_address(pix.get_offer(nft_id));
+        let offer = pix.get_offer(nft_id);
+        assert!(offer.get_nft_id() == nft_id);
 
         
         withdraw_offer<NFT_1>(&mut pix, nft_id, scenario.ctx());
