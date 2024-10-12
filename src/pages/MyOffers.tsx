@@ -1,12 +1,50 @@
-import { useResolveSuiNSName } from '@mysten/dapp-kit';
-import { useSuiClientQuery } from '@mysten/dapp-kit';
-import { ConnectModal, useCurrentAccount } from '@mysten/dapp-kit';
+import { useSuiClientQuery, useCurrentAccount } from '@mysten/dapp-kit';
 import Navbar from '../components/Navbar'; // Import your Navbar component
-import { Box, Container, Flex, Heading } from "@radix-ui/themes";
-import NFTLogic from '../components/NFTLogic';
 
-// Call a list NFTs function from pixelPawn
+const PACKAGE_ID = 0x0
+
+// Custom hook to fetch offers
+const useFetchOffers = () => {
+  const account = useCurrentAccount();
+
+  if (!account) {
+    return { data: [], isLoading: false, isError: false }; // Return empty data if no account is connected
+  }
+
+  // Query to fetch OfferPTB structs where the pawner is the connected account
+  const { data, isLoading, isError, error, refetch } = useSuiClientQuery(
+    'getOwnedObjects', // This should match your Move function name
+    {
+      owner: account.address,
+      // The filter condition is specific to your implementation
+      filter: {
+        MatchAll: [
+          {
+            StructType: `${PACKAGE_ID}::pixelpawn::OfferPTB`, // Specify the struct type
+          },
+        ],
+      },
+      options: {
+        showContent: true,
+        showDisplay: true,
+        showType: true,
+      },
+    },
+    { queryKey: ['OffersPTB'] }, // Optional query key for caching
+  );
+
+  return {
+    data: data && data.data.length > 0 ? data.data : [], // Return the fetched data
+    isLoading,
+    isError,
+    error,
+    refetch,
+  };
+};
+console.log(useFetchOffers)
 const myOffers = () => {
+  const { data: offers, isLoading, isError, error, refetch } = useFetchOffers();
+
   return (
     <div className="min-h-screen bg-base-200">
       <Navbar />
@@ -14,9 +52,30 @@ const myOffers = () => {
         <section className="hero bg-base-100 rounded-lg shadow-md mb-8">
           <body>Here are all the NFTs you have put up on offer</body>
         </section>
+        <section>
+          {isLoading && <p>Loading offers...</p>}
+          {isError && <p>Error fetching offers: {error.message}</p>}
+          {offers.length > 0 ? (
+            offers.map((offer) => (
+              <div key={offer.nft_id} className="offer-card p-4 border rounded mb-4">
+                <h3>NFT ID: {offer.content.fields.id}</h3>
+                <p>Pawner: {offer.pawner}</p>
+                <p>Lender: {offer.lender}</p>
+                <p>Loan Amount: {offer.loan_amount}</p>
+                <p>Interest Rate: {offer.interest_rate}%</p>
+                <p>Duration: {offer.duration} ms</p>
+                <p>Loan Status: {offer.loan_status}</p>
+                <p>Repayment Status: {offer.repayment_status}</p>
+              </div>
+            ))
+          ) : (
+            <p>No offers found.</p>
+          )}
+          <button onClick={refetch} className="btn btn-secondary mt-4"> Refresh Offers</button>
+        </section>
       </main>
     </div>
   );
-}
-  
+};
+
 export default myOffers;
