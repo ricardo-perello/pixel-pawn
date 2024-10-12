@@ -99,7 +99,7 @@ module pixelpawn::pixelpawn{
         clock: &Clock,
         wallet: Balance,
         ctx: &mut TxContext,
-    ): T {
+    ) {
         let pawner = tx_context::sender(ctx);
         let offer = pix.offers.remove(nft_id);
         assert!(offer.loan_status == 1);
