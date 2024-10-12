@@ -1,4 +1,4 @@
-import { useSuiClientQuery, useCurrentAccount, useAccounts } from '@mysten/dapp-kit';
+import { useSuiClientQuery, useCurrentAccount } from '@mysten/dapp-kit';
 import Navbar from '../components/Navbar'; // Import your Navbar component
 
 const PACKAGE_ID = 0x0;
@@ -44,40 +44,14 @@ const useFetchOffers = () => {
 
 const MyOffers = () => {
   const { data: offers, isLoading, isError, error, refetch } = useFetchOffers();
-  const currentAccount = useCurrentAccount()
+  
 
-  if(!currentAccount){
-    return (
-      <>
-        <Navbar/>
-        <div className="max-w-7xl mx-auto p-4 mt-20">
-        <div className="flex justify-center  h-screen">
-          {currentAccount ? (
-              counterId ? (
-                <PixelPawn id={counterId} />
-              ) : (
-                <CreateCounter
-                  onCreated={(id) => {
-                    window.location.hash = id;
-                    setCounter(id);
-                  }}
-                />
-              )
-            ) : (
-              <h1 className="text-3xl font-bold mb-4">Please connect your wallet</h1>
-            )}
-          </div>
-        </div>
-      </>
-    );
-  }
   return (
-    <>
     <div className="min-h-screen bg-base-200">
       <Navbar />
       <div className="h-24"></div> {20}{20}
       <main className="container mx-auto px-4 py-8 mt-8"> {100}{100}
-        <section className="text-3xl font-bold mb-4">{20}
+        <section className="hero bg-base-100 rounded-lg shadow-md mb-8">{20}
           <h2>Here are all the NFTs you have put up on offer</h2>
         </section>
         <section>
@@ -97,15 +71,12 @@ const MyOffers = () => {
               </div>
             ))
           ) : (
-            <section className = "text-3xl font-bold mb-4">
-              <p>No offers found.</p>
-            </section>
+            <p>No offers found.</p>
           )}
           <button onClick={refetch} className="btn btn-secondary mt-8"> Refresh Offers</button>
         </section>
       </main>
     </div>
-    </>
   );
 };
 

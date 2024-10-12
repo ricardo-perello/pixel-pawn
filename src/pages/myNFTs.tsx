@@ -1,53 +1,58 @@
-import { useResolveSuiNSName } from '@mysten/dapp-kit';
-import { useSuiClientQuery } from '@mysten/dapp-kit';
-import { ConnectModal, useCurrentAccount } from '@mysten/dapp-kit';
-import Navbar from '../components/Navbar'; // Import your Navbar component
-import { Box, Container, Flex, Heading } from "@radix-ui/themes";
-import NFTLogic from '../components/NFTLogic';
+// src/pages/MyNFTs.tsx
+import React, { useEffect, useState } from 'react';
+import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
+import NFTCard from '../components/NFTCard';
+import type { SuiObjectResponse } from '@mysten/sui/client';
 
 
-const myNFTs = () => {
+const MyNFTs = () => {
   const currentAccount = useCurrentAccount();
+  const suiClient = useSuiClient();
+  const [nfts, setNfts] = useState<SuiObjectResponse[]>([]);
 
-  const { SuiNSData, isSuiNSPending } = useResolveSuiNSName(currentAccount?.address);
+  useEffect(() => {
+    const fetchNFTs = async () => {
+      if (currentAccount?.address) {
+        try {
+          const response = await suiClient.getOwnedObjects({
+            owner: currentAccount.address,
+            options: {
+              showContent: true,
+            },
+          });
+          setNfts(response.data);
+        } catch (error) {
+          console.error('Error fetching NFTs:', error);
+        }
+      }
+    };
 
-  const { data, isPending, isError, error, refetch } = useSuiClientQuery(
-    'getOwnedObjects',
-    { owner: currentAccount?.address },
-    {
-      gcTime: 10000,
-    }, 
-  );
+    fetchNFTs();
+  }, [currentAccount, suiClient]);
 
-  if (isPending) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Navbar />
-        <div className="loader">Loading</div>
-      </div>
-    );
+  if (!currentAccount) {
+    return <div className="p-4">Please connect your wallet to view your NFTs.</div>;
   }
-
-  if (isError) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Navbar />
-        <div className="text-2xl text-red-500">Err {error.message}</div>
-      </div>
-    );
-  }
+  
+  const validNfts = nfts.filter((nft) => nft.data != null);
 
   return (
-    <div className="min-h-screen bg-base-200" >
-      <Navbar />
-      <main className="container mx-auto px-4 py-8 mt-16">
-        <section className="hero bg-base-100 rounded-lg shadow-md mb-8">  
-          <NFTLogic />
-        </section>
-      </main>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">My NFTs</h1>
+      {nfts.length === 0 ? (
+        <p>You don't have any NFTs.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+          {
+          
+          nfts.map((nft) => (
+            <NFTCard key={validNfts.values} nft={nft} />
+          ))}
+        </div>
+      )}
     </div>
-
   );
 };
 
-export default myNFTs;
+export default MyNFTs;

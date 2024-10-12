@@ -1,4 +1,17 @@
-
+/*
+const exact_amount = 12300;
+const tx = new Transaction();
+const coin = tx.splitCoins(tx.gas, [tx.pure.u64(exact_amount)]);
+tx.moveCall({
+target: `${packageId}::pixelpawn::repay_loan`,
+arguments: [
+    tx.object(${pixelPawnObjID}),
+    tx.pure.id(${ntf_id}),
+    tx.object("0x8"),
+    coin
+]
+})
+*/
 /// Module: pixelpawn
 module pixelpawn::pixelpawn{
 
@@ -10,8 +23,13 @@ module pixelpawn::pixelpawn{
     use sui::transfer;
     use sui::sui::SUI;
     use sui::coin::{Self, Coin};
-    use sui::balance;
+    use sui::balance::{Self, Balance};
     use sui::pay;
+
+    // Error codes
+    const EIncorrectAmount: u64 = 0;
+    const EIncorrenctPayment: u64 = 1;
+    const EIncorrenctOwner: u64 = 2;
 
     const PLATFORM_RATE: u64 = 2;
     // Struct for ChronoKiosk that will include time-locked items
@@ -19,14 +37,38 @@ module pixelpawn::pixelpawn{
         id: UID,
         owner: address,
         offers: Table<ID, Offer>, // Table to link NFTs to offers
+        fees: Balance<SUI>
+    }
+
+    //PixelPawn getters
+    public fun get_owner(pix: PixelPawn): address{
+        return pix.owner
+    }
+
+    public fun get_offer(pix: PixelPawn, nft_id: ID): &Offer{
+        return pix.offers.borrow(nft_id)
+    }
+
+    public fun get_fees(pix: PixelPawn): u64{
+        return pix.fees.value()
+    }
+
+    public struct OwnerCap has key, store {
+        id : UID,
+        owner : address
     }
 
     // Function to create a time-locked kiosk
-    public fun create_pixel_pawn(ctx: &mut TxContext): (PixelPawn) {
+    public fun create_pixel_pawn(ctx: &mut TxContext): OwnerCap {
         let id = new(ctx);
         let owner = tx_context::sender(ctx);
         let offers = table::new<ID, Offer>(ctx);
-        (PixelPawn {id, owner, offers})
+        let bal = balance::zero<SUI>();
+        let pix = (PixelPawn {id, owner, offers, fees: bal});
+        let ownerCap = OwnerCap { id: object::new(ctx), owner };
+
+        transfer::public_share_object(pix);
+        return ownerCap
     }
 
     fun add_nft<T: key+store>(nft: T, pix: &mut PixelPawn, ctx: &mut TxContext) {
@@ -38,10 +80,17 @@ module pixelpawn::pixelpawn{
         dof::remove(&mut pix.id, nft_id)
     }
 
+    public fun withdraw_balance(pix: &mut PixelPawn, cap: OwnerCap, ctx: &mut TxContext): OwnerCap{
+        assert!(pix.owner == cap.owner, EIncorrenctOwner);
+        let transfer_coins = pix.fees.withdraw_all();
+        transfer::public_transfer(transfer_coins.into_coin(ctx), pix.owner);
+        return cap
+    }
 
 
 
-    // Your OfferPTB struct remains the same
+
+    // Offer struct
     public struct Offer has store {
         nft_id: ID,
         pawner: address,
@@ -53,6 +102,39 @@ module pixelpawn::pixelpawn{
         loan_status: u8, // 0: Open, 1: Loaned
     }
 
+    //Offer Getters
+    public fun get_nft_id(offer: Offer): ID {
+        return offer.nft_id
+    }
+
+    public fun get_pawner(offer: Offer): address {
+        return offer.pawner
+    }
+
+    public fun get_lender(offer: Offer): address {
+        return offer.lender
+    }
+
+    public fun get_loan_amount(offer: Offer): u64 {
+        return offer.loan_amount
+    }
+
+    public fun get_interest_rate(offer: Offer): u64 {
+        return offer.interest_rate
+    }
+
+    public fun get_duration(offer: Offer): u64 {
+        return offer.duration
+    }
+
+    public fun get_timestamp(offer: Offer): u64 {
+        return offer.timestamp
+    }
+
+    public fun get_loan_status(offer: Offer): u8 {
+        return offer.loan_status
+    }
+   
 
     public entry fun create_offer<T: key+store>(
         pix: &mut PixelPawn,
@@ -109,12 +191,13 @@ module pixelpawn::pixelpawn{
         pix: &mut PixelPawn,
         nft_id: ID,
         clock: &Clock,
-        coins: &mut Coin<SUI>,
+        coins: Coin<SUI>,
         ctx: &mut TxContext,
     ) {
         let lender = tx_context::sender(ctx);
         let offer = pix.offers.borrow_mut(nft_id);
         assert!(offer.loan_status == 0);
+        assert!(coins.value() == offer.loan_amount, EIncorrectAmount);
          
         // Update offer
         offer.lender = lender;
@@ -122,14 +205,15 @@ module pixelpawn::pixelpawn{
         offer.timestamp = clock.timestamp_ms(); // Update timestamp to loan start time
 
         // Transfer funds from lender to pawner
-        pay::split_and_transfer(coins, offer.loan_amount, offer.pawner, ctx);
+        
+        transfer::public_transfer(coins, offer.pawner);
     }
 
     public entry fun repay_loan <T: key+store>(
         pix: &mut PixelPawn,
         nft_id: ID,
         clock: &Clock,
-        coins: &mut Coin<SUI>,
+        mut coins: Coin<SUI>,
         ctx: &mut TxContext,
     ) {
         let pawner = tx_context::sender(ctx);
@@ -141,8 +225,8 @@ module pixelpawn::pixelpawn{
 
         // Calculate repayment amount
         let total_due = (offer.loan_amount * (100 + offer.interest_rate))/100;
+        assert!(coins.value() == total_due, EIncorrenctPayment);
         let platform_fee = (total_due * PLATFORM_RATE)/100;
-        let lender_amount = total_due - platform_fee;
         
         // delete offer;
         let Offer {
@@ -160,8 +244,9 @@ module pixelpawn::pixelpawn{
         transfer::public_transfer(nft, pawner);
 
         // Transfer repayment from pawner to lender and platform fee to shop owner
-        pay::split_and_transfer(coins, lender_amount, lender, ctx);
-        pay::split_and_transfer(coins, platform_fee, pix.owner, ctx);
+        let platform_coin = coins.split(platform_fee, ctx);
+        pix.fees.join(platform_coin.into_balance());
+        transfer::public_transfer(coins, lender);
     }
 
     public entry fun claim_nft<T: key+store>(
