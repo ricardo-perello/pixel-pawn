@@ -6,11 +6,21 @@ module pixelpawn::tests {
     use sui::sui::SUI;
     use pixelpawn::pixelpawn::{PixelPawn, create_pixel_pawn, create_offer, withdraw_offer, accept_offer, repay_loan, claim_nft};
 
+    #[test_only]
+    fun test_create_pixel_pawn(): Scenario {
+        let mut scenario = ts::begin(@0xA);
+        create_pixel_pawn(scenario.ctx());
+        scenario
+    }
+
     #[test]
-    fun test_create_pixel_pawn() {
-        let mut ctx = tx_context::dummy();
-        let pixel_pawn = create_pixel_pawn(&mut ctx);
-        assert!(pixel_pawn.offers.is_empty(), 1);
+    fun check_owner(){
+        let mut scenario = test_create_pixel_pawn();
+        scenario.next_tx(@0xA);
+        let pix = scenario.take_shared<PixelPawn>();
+        assert!(pix.get_owner() == @0xA);
+        ts::return_shared(pix);
+        scenario.end();
     }
 
     #[test]
