@@ -45,6 +45,10 @@ module pixelpawn::pixelpawn{
         return pix.owner
     }
 
+    public fun get_offers_size(pix: PixelPawn): u64{
+        return pix.offers.length()
+    }
+
     public fun get_offer(pix: PixelPawn, nft_id: ID): &Offer{
         return pix.offers.borrow(nft_id)
     }

@@ -5,11 +5,14 @@ module pixelpawn::tests {
     use sui::coin::{Coin, mint_for_testing};
     use sui::sui::SUI;
     use pixelpawn::pixelpawn::{PixelPawn, create_pixel_pawn, create_offer, withdraw_offer, accept_offer, repay_loan, claim_nft};
+    use pixelpawn::nfttypes::mint_nft_1;
+    use pixelpawn::nfttypes::NFT_1;
+    use pixelpawn::pixelpawn::Offer;
 
     #[test_only]
     fun test_create_pixel_pawn(): Scenario {
         let mut scenario = ts::begin(@0xA);
-        create_pixel_pawn(scenario.ctx());
+        let cap = create_pixel_pawn(scenario.ctx());
         scenario
     }
 
@@ -25,18 +28,22 @@ module pixelpawn::tests {
 
     #[test]
     fun test_create_and_withdraw_offer() {
-        let mut ts = ts::begin(@0xA);
-        let mut ctx = ts.ctx();
-        let mut pixel_pawn = create_pixel_pawn(ctx);
+        let mut scenario = test_create_pixel_pawn();
+        scenario.next_tx(@0xA);
+        let pix = scenario.take_shared<PixelPawn>();
         
         // Dummy NFT object
-        let nft = object::new(ctx);
+        let nft = mint_nft_1(100, 6, scenario.ctx());
         
-        create_offer(&mut pixel_pawn, nft, 100, 5, 1000, ctx);
+        create_offer(&mut pix, nft, 100, 5, 1000, scenario.ctx());
         let nft_id = object::id(&nft);
+        assert!(pix.get_offers_size() == 1);
+
+        let offer = scenario.take_from_address(pix.get_offer(nft_id));
+
         
-        withdraw_offer(&mut pixel_pawn, nft_id, ctx);
-        assert!(pixel_pawn.offers.is_empty(), 1);
+        withdraw_offer<NFT_1>(&mut pix, nft_id, scenario.ctx());
+        assert!(pix.get_offers_size() == 0);
     }
 
     #[test]
