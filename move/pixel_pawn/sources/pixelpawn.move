@@ -40,6 +40,19 @@ module pixelpawn::pixelpawn{
         fees: Balance<SUI>
     }
 
+    //PixelPawn getters
+    public fun get_owner(pix: PixelPawn): address{
+        return pix.owner
+    }
+
+    public fun get_offer(pix: PixelPawn, nft_id: ID): &Offer{
+        return pix.offers.borrow(nft_id)
+    }
+
+    public fun get_fees(pix: PixelPawn): u64{
+        return pix.fees.value()
+    }
+
     public struct OwnerCap has key, store {
         id : UID,
         owner : address
@@ -89,6 +102,39 @@ module pixelpawn::pixelpawn{
         loan_status: u8, // 0: Open, 1: Loaned
     }
 
+    //Offer Getters
+    public fun get_nft_id(offer: Offer): ID {
+        return offer.nft_id
+    }
+
+    public fun get_pawner(offer: Offer): address {
+        return offer.pawner
+    }
+
+    public fun get_lender(offer: Offer): address {
+        return offer.lender
+    }
+
+    public fun get_loan_amount(offer: Offer): u64 {
+        return offer.loan_amount
+    }
+
+    public fun get_interest_rate(offer: Offer): u64 {
+        return offer.interest_rate
+    }
+
+    public fun get_duration(offer: Offer): u64 {
+        return offer.duration
+    }
+
+    public fun get_timestamp(offer: Offer): u64 {
+        return offer.timestamp
+    }
+
+    public fun get_loan_status(offer: Offer): u8 {
+        return offer.loan_status
+    }
+   
 
     public entry fun create_offer<T: key+store>(
         pix: &mut PixelPawn,
