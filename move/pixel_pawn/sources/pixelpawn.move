@@ -6,9 +6,12 @@ module pixelpawn::pixelpawn{
     use sui::clock::Clock;
     use sui::dynamic_object_field as dof;
     use sui::table::{Self, Table};
-    use sui::kiosk::{Kiosk, KioskOwnerCap};
     use sui::tx_context::{Self, TxContext};
+    use sui::coin;
+    use sui::transfer;
+    use sui::sui::SUI;
 
+    const PLATFORM_RATE: u64 = 2;
     // Struct for ChronoKiosk that will include time-locked items
     public struct PixelPawn has key, store {
         id: UID,
@@ -80,6 +83,7 @@ module pixelpawn::pixelpawn{
         pix: &mut PixelPawn,
         nft_id: ID,
         clock: &Clock,
+        coins: vector<coin::Coin<sui::sui::SUI>>,
         ctx: &mut TxContext,
     ) {
         let lender = tx_context::sender(ctx);
@@ -87,6 +91,16 @@ module pixelpawn::pixelpawn{
         assert!(offer.loan_status == 0);
         // Transfer funds from lender to pawner
         // TODO transfer the money
+
+        // Split the merged coin into the desired amount and the remainder
+        let (transfer_coin, remainder_coin) = coin::split_vec(coins, offer.loan_amount, ctx);
+
+        // Transfer the specified amount to the recipient
+        transfer::public_transfer(transfer_coin, offer.pawner);
+
+        // Return the remainder to the original sender
+        transfer::public_transfer(remainder_coin, lender);
+
         // Update offer
         offer.lender = lender;
         offer.loan_status = 1;
@@ -97,7 +111,7 @@ module pixelpawn::pixelpawn{
         pix: &mut PixelPawn,
         nft_id: ID,
         clock: &Clock,
-        wallet: Balance,
+        coins: vector<coin::Coin<sui::sui::SUI>>,
         ctx: &mut TxContext,
     ) {
         let pawner = tx_context::sender(ctx);
@@ -107,13 +121,28 @@ module pixelpawn::pixelpawn{
         let current_time = clock.timestamp_ms();
         assert!(current_time <= offer.timestamp + offer.duration);
         // Calculate repayment amount
-        let interest = calculate_interest(offer.loan_amount, offer.interest_rate);
-        let total_due = offer.loan_amount + interest;
-        let platform_fee = calculate_platform_fee(offer.loan_amount, interest);
+        let total_due = (offer.loan_amount * (100 + offer.interest_rate))/100;
+        let platform_fee = (total_due * PLATFORM_RATE)/100;
         let lender_amount = total_due - platform_fee;
         // Transfer repayment from pawner to lender and platform fee to shop owner
         //TODO transfer the money
+        // Merge all coins into one
+        let merged_coin = coin::merge_coins(coins, ctx);
+
+        // Split the merged coin into the desired amount and the remainder
+        let (transfer_coin, remainder_coin) = coin::split_coin(merged_coin, total_due, ctx);
+
+        let (transfer_platform, transfer_lender) = coin::split_coin(transfer_coin, platform_fee, ctx);
         
+        // Transfer the specified amount to the recipient
+        transfer::public_transfer(transfer_lender, offer.lender);
+
+        // Transfer fee to the pawn shop owner
+        transfer::public_transfer(transfer_platform, pix.owner);
+
+        // Return the remainder to the original sender
+        transfer::public_transfer(remainder_coin, pawner);
+
         // delete offer;
         let OfferPTB {
             nft_id:_,
@@ -127,7 +156,8 @@ module pixelpawn::pixelpawn{
             repayment_status:_,
         } = offer;
         // Unlock NFT and return to pawner
-        return remove_nft(nft_id, pix, ctx)
+        let nft: T = remove_nft(nft_id, pix, ctx);
+        transfer::public_transfer(nft, pawner);
         
     }
 
