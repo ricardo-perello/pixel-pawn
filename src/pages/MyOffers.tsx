@@ -50,7 +50,7 @@ const MyOffers = () => {
     <div className="min-h-screen bg-base-200">
       <div className="h-24"></div>
       <main className="container mx-auto px-4 py-8 mt-8">
-        <section className="text-5xl font-bold mb-4">
+        <section className="text-2xl font-bold mb-4">
           <h2>Here are all the NFTs you have put up on offer</h2>
         </section>
         <section>
@@ -70,7 +70,7 @@ const MyOffers = () => {
               </div>
             ))
           ) : (
-            <section className= 'text-5xl font-bold mb-4'> 
+            <section className= 'text-2xl font-bold mb-4'> 
               <p>No offers found.</p>
             </section>
           )}
