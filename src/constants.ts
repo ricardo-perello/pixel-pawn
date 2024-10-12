@@ -1,3 +1,4 @@
 export const DEVNET_PIXEL_PAWN_PACKAGE_ID = "0xTODO";
 export const TESTNET_PIXEL_PAWN_PACKAGE_ID = "0xTODO";
 export const MAINNET_PIXEL_PAWN_PACKAGE_ID = "0xTODO";
+export const PACKAGE_ID = '0x71800ac82b48e978acd8af88f40d6aaaa552328ca90cf6b97e2c1a7e5e5aeb49'
