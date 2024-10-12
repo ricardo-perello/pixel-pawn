@@ -2,7 +2,6 @@
 /target/
 /move/pixel_pawn
 /build/
-/.move/
 /Move.toml.lock
 /Move.lock
 # Ignore dependency directories
