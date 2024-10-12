@@ -12,13 +12,15 @@ const MyNFTs = () => {
   useEffect(() => {
     const fetchNFTs = async () => {
       if (currentAccount?.address) {
+        console.log("2")
         try {
           const response = await suiClient.getOwnedObjects({
-            owner: currentAccount.address,
+            owner: currentAccount.address, 
             options: {
               showContent: true,
             },
           });
+          console.log("3", response)
           setNfts(response.data);
         } catch (error) {
           console.error('Error fetching NFTs:', error);
