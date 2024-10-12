@@ -82,10 +82,7 @@ const NFTLogic = () => {
               </div>
             </div>
           ))}
-        </div>
-        
-         
-      
+        </div> 
     </div>
 
   );

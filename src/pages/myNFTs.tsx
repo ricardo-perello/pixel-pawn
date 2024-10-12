@@ -6,7 +6,7 @@ import { Box, Container, Flex, Heading } from "@radix-ui/themes";
 import NFTLogic from '../components/NFTLogic';
 
 
-const NFT = () => {
+const myNFTs = () => {
   const currentAccount = useCurrentAccount();
 
   const { SuiNSData, isSuiNSPending } = useResolveSuiNSName(currentAccount?.address);
@@ -16,7 +16,7 @@ const NFT = () => {
     { owner: currentAccount?.address },
     {
       gcTime: 10000,
-    },
+    }, 
   );
 
   if (isPending) {
@@ -40,7 +40,6 @@ const NFT = () => {
   return (
     <div className="min-h-screen bg-base-200" >
       <Navbar />
-      
       <main className="container mx-auto px-4 py-8 mt-16">
         <section className="hero bg-base-100 rounded-lg shadow-md mb-8">  
           <NFTLogic />
@@ -51,4 +50,4 @@ const NFT = () => {
   );
 };
 
-export default NFT;
+export default myNFTs;

@@ -8,7 +8,7 @@ import type { SuiObjectData } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import { useNetworkVariable } from "./networkConfig";
 
-export function Counter({ id }: { id: string }) {
+export function PixelPawn({ id }: { id: string }) {
   const counterPackageId = useNetworkVariable("counterPackageId");
   const suiClient = useSuiClient();
   const currentAccount = useCurrentAccount();

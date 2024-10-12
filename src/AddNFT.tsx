@@ -30,7 +30,7 @@ export function CreateCounter({
           create();
         }}
       >
-        Create Counter
+        Add NFT 
       </button>
     </div>
   );
