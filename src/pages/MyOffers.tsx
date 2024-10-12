@@ -1,7 +1,6 @@
 import { useSuiClientQuery, useCurrentAccount } from '@mysten/dapp-kit';
 import Navbar from '../components/Navbar'; // Import your Navbar component
-
-const PACKAGE_ID = 0x0;
+import { PACKAGE_ID } from '../constants';
 
 // Custom hook to fetch offers
 const useFetchOffers = () => {

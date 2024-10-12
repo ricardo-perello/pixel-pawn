@@ -25,14 +25,16 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
   };
 
   // Function to handle the pawn NFT action
-  const pawnNFT = () => {
+  const pawnNFT = (loanAmount : number, duration : number) => {
     const tx = new Transaction();
     tx.moveCall({
       target: `${PACKAGE_ID}::pixel_pawn::create_offer`,
       arguments: [
+        tx.pure.string(),
+        tx.object(nft),
         tx.object(nft.data.objectId),
-        tx.pure(loanAmount),
-        tx.pure(duration),
+        tx.pure.u64(loanAmount),
+        tx.pure.u64(duration),
       ],
     });
     signAndExecute(
@@ -137,7 +139,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
                 <span className="label-text">Loan Amount (SUI)</span>
               </label>
               <input
-                type="number"
+                type="u64"
                 value={loanAmount}
                 onChange={(e) => setLoanAmount(Number(e.target.value))}
                 className="input input-bordered w-full"
@@ -152,7 +154,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
                 <span className="label-text">Duration (Days)</span>
               </label>
               <input
-                type="number"
+                type="u64"
                 value={duration}
                 onChange={(e) => setDuration(Number(e.target.value))}
                 className="input input-bordered w-full"
@@ -171,7 +173,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
               </button>
               <button
                 className="btn btn-primary"
-                onClick={pawnNFT}
+                onClick={() => pawnNFT(loanAmount, duration)}
               >
                 Submit
               </button>
