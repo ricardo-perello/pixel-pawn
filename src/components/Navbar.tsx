@@ -7,7 +7,7 @@ const Navbar = () => {
     <div className="navbar bg-base-100 fixed top-0 z-50 h-20 mb-0 pb-0">
       <div className="navbar-start">
         <Link to="/" className="btn btn-ghost normal-case text-xl hover:scale-110 transition-transform duration-200">
-          BSA x SUI Starter Pack
+          Pixel_Pawn
         </Link>
       </div>
       <div className="navbar-center">
@@ -16,13 +16,13 @@ const Navbar = () => {
             <Link to="/" className="btn btn-base-100 text-lg normal-case hover:scale-110 transition-transform duration-200">Home</Link>
           </li>
           <li>            
-          <Link to="/NFT" className="btn btn-base-100 text-lg normal-case hover:scale-110 transition-transform duration-200">NFT</Link>
+          <Link to="/myNFTs" className="btn btn-base-100 text-lg normal-case hover:scale-110 transition-transform duration-200">My NFTs</Link>
           </li>
           <li>
-            <Link to="/Debug" className="btn btn-base-100 text-lg normal-case hover:scale-110 transition-transform duration-200">Debug</Link>
+            <Link to="/myOffers" className="btn btn-base-100 text-lg normal-case hover:scale-110 transition-transform duration-200">My Offers</Link>
           </li>
           <li>
-            <Link to="/Test" className="btn btn-base-100 text-lg normal-case hover:scale-110 transition-transform duration-200">NFTs</Link>
+            <Link to="/Test" className="btn btn-base-100 text-lg normal-case hover:scale-110 transition-transform duration-200">MarketPlace</Link>
           </li>
         </ul>
       </div>
