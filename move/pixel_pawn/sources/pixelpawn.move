@@ -41,18 +41,19 @@ module pixelpawn::pixelpawn{
     }
 
     //PixelPawn getters
+    #[test_only]
     public fun get_owner(pix: PixelPawn): address{
         return pix.owner
     }
-
+    #[test_only]
     public fun get_offers_size(pix: PixelPawn): u64{
         return pix.offers.length()
     }
-
+   #[test_only]
     public fun get_offer(pix: PixelPawn, nft_id: ID): &Offer{
         return pix.offers.borrow(nft_id)
     }
-
+   #[test_only]
     public fun get_fees(pix: PixelPawn): u64{
         return pix.fees.value()
     }
@@ -107,34 +108,35 @@ module pixelpawn::pixelpawn{
     }
 
     //Offer Getters
+    #[test_only]
     public fun get_nft_id(offer: &Offer): ID {
         return offer.nft_id
     }
-
+   #[test_only]
     public fun get_pawner(offer: &Offer): address {
         return offer.pawner
     }
-
+   #[test_only]
     public fun get_lender(offer: Offer): address {
         return offer.lender
     }
-
+   #[test_only]
     public fun get_loan_amount(offer: Offer): u64 {
         return offer.loan_amount
     }
-
+   #[test_only]
     public fun get_interest_rate(offer: Offer): u64 {
         return offer.interest_rate
     }
-
+   #[test_only]
     public fun get_duration(offer: Offer): u64 {
         return offer.duration
     }
-
+   #[test_only]
     public fun get_timestamp(offer: Offer): u64 {
         return offer.timestamp
     }
-
+   #[test_only]
     public fun get_loan_status(offer: Offer): u8 {
         return offer.loan_status
     }
