@@ -51,7 +51,7 @@ const MyOffers = () => {
       <Navbar />
       <div className="h-24"></div> {20}{20}
       <main className="container mx-auto px-4 py-8 mt-8"> {100}{100}
-        <section className="hero bg-base-100 rounded-lg shadow-md mb-8">
+        <section className="hero bg-base-100 rounded-lg shadow-md mb-8">{20}
           <h2>Here are all the NFTs you have put up on offer</h2>
         </section>
         <section>
@@ -59,7 +59,7 @@ const MyOffers = () => {
           {isError && <p>Error fetching offers: {error.message}</p>}
           {offers.length > 0 ? (
             offers.map((offer) => (
-              <div key={offer.nft_id} className="offer-card p-4 border rounded mb-4">
+              <div key={offer.nft_id} className="offer-card p-4 border rounded mb-4">{20}
                 <h3>NFT ID: {offer.content.fields.id}</h3>
                 <p>Pawner: {offer.pawner}</p>
                 <p>Lender: {offer.lender}</p>
