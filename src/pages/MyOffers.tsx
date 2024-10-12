@@ -48,10 +48,9 @@ const MyOffers = () => {
 
   return (
     <div className="min-h-screen bg-base-200">
-      <Navbar />
-      <div className="h-24"></div> {20}{20}
-      <main className="container mx-auto px-4 py-8 mt-8"> {100}{100}
-        <section className="hero bg-base-100 rounded-lg shadow-md mb-8">{20}
+      <div className="h-24"></div>
+      <main className="container mx-auto px-4 py-8 mt-8">
+        <section className="text-5xl font-bold mb-4">
           <h2>Here are all the NFTs you have put up on offer</h2>
         </section>
         <section>
@@ -59,7 +58,7 @@ const MyOffers = () => {
           {isError && <p>Error fetching offers: {error.message}</p>}
           {offers.length > 0 ? (
             offers.map((offer) => (
-              <div key={offer.nft_id} className="offer-card p-4 border rounded mb-4">{20}
+              <div key={offer.nft_id} className="offer-card p-4 border rounded mb-4">
                 <h3>NFT ID: {offer.content.fields.id}</h3>
                 <p>Pawner: {offer.pawner}</p>
                 <p>Lender: {offer.lender}</p>
@@ -71,7 +70,9 @@ const MyOffers = () => {
               </div>
             ))
           ) : (
-            <p>No offers found.</p>
+            <section className= 'text-5xl font-bold mb-4'> 
+              <p>No offers found.</p>
+            </section>
           )}
           <button onClick={refetch} className="btn btn-secondary mt-8"> Refresh Offers</button>
         </section>
