@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Transaction } from '@mysten/sui/transactions';
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
-import { PACKAGE_ID } from '../constants';
+import { PACKAGE_ID , TESTNET_PIXEL_PAWN_OBJECT_ID} from '../constants';
 
 interface NFTCardProps {
   nft: any;
@@ -29,15 +29,19 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
   const pawnNFT = (loanAmount : number, duration : number, interestRate: number) => {
     const tx = new Transaction();
     tx.moveCall({
-      target: `${PACKAGE_ID}::pixel_pawn::create_offer`,
+      target: `${PACKAGE_ID}::pixelpawn::create_offer`,
       arguments: [
-        
+        tx.object(TESTNET_PIXEL_PAWN_OBJECT_ID),
         tx.object(nft.data.objectId),
         tx.pure.u64(loanAmount),
         tx.pure.u64(interestRate),
-        tx.pure.u64(duration),
+        tx.pure.u64(duration)
+      ],
+      typeArguments: [
+        nft.data.type
       ],
     });
+    tx.setGasBudget(10000000)
     signAndExecute(
       {
         transaction: tx,
@@ -167,7 +171,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
             {/* Form Control for Interest Rate */}
             <div className="form-control mb-6">
               <label className="label">
-                <span className="label-text">InterestRate (%)</span>
+                <span className="label-text">Interest Rate (%)</span>
               </label>
               <input
                 type="u64"

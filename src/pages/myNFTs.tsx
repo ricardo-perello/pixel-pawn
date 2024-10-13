@@ -18,6 +18,7 @@ const MyNFTs = () => {
             owner: currentAccount.address, 
             options: {
               showContent: true,
+              showType: true
             },
           });
           console.log("3", response)
