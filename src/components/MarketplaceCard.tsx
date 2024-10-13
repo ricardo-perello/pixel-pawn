@@ -25,7 +25,6 @@ const MarketplaceOfferCard = ({ market }, { address }) => {
           tx.object('0x6'),
           coin
         ],
-        typeArguments: [nft.data?.type!],
       });
       tx.setGasBudget(10000000);
       signAndExecute(
