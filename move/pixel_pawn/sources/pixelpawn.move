@@ -64,7 +64,7 @@ module pixelpawn::pixelpawn{
     }
 
     // Function to create a time-locked kiosk
-    public fun create_pixel_pawn(ctx: &mut TxContext): OwnerCap {
+    public fun create_pixel_pawn(ctx: &mut TxContext) {
         let id = new(ctx);
         let owner = tx_context::sender(ctx);
         let offers = table::new<ID, Offer>(ctx);
@@ -73,7 +73,7 @@ module pixelpawn::pixelpawn{
         let ownerCap = OwnerCap { id: object::new(ctx), owner };
 
         transfer::public_share_object(pix);
-        return ownerCap
+        transfer::public_transfer(ownerCap, ctx.sender());
     }
 
     fun add_nft<T: key+store>(nft: T, pix: &mut PixelPawn, ctx: &mut TxContext) {
