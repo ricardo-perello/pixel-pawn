@@ -15,16 +15,13 @@ arguments: [
 /// Module: pixelpawn
 module pixelpawn::pixelpawn{
 
-    use sui::object::{UID, new}; 
+    use sui::object::{new}; 
     use sui::clock::Clock;
     use sui::dynamic_object_field as dof;
     use sui::table::{Self, Table};
-    use sui::tx_context::{Self, TxContext};
-    use sui::transfer;
     use sui::sui::SUI;
-    use sui::coin::{Self, Coin};
+    use sui::coin::{Coin};
     use sui::balance::{Self, Balance};
-    use sui::pay;
 
     // Error codes
     const EIncorrectAmount: u64 = 0;
@@ -76,12 +73,12 @@ module pixelpawn::pixelpawn{
         ownerCap
     }
 
-    fun add_nft<T: key+store>(nft: T, pix: &mut PixelPawn, ctx: &mut TxContext) {
+    fun add_nft<T: key+store>(nft: T, pix: &mut PixelPawn, _ctx: &mut TxContext) {
         let id = object::id(&nft);
         dof::add(&mut pix.id, id, nft);
     }
 
-    fun remove_nft<T: key+store>(nft_id: ID, pix: &mut PixelPawn, ctx: &mut TxContext): T {
+    fun remove_nft<T: key+store>(nft_id: ID, pix: &mut PixelPawn, _ctx: &mut TxContext): T {
         dof::remove(&mut pix.id, nft_id)
     }
 

@@ -1,13 +1,10 @@
 module pixelpawn::tests {
-    use sui::tx_context::{Self, TxContext};
-    use sui::clock::Clock;
     use sui::test_scenario::{Self as ts, Scenario};
-    use sui::coin::{Coin, mint_for_testing};
+    use sui::coin::{mint_for_testing};
     use sui::sui::SUI;
     use pixelpawn::pixelpawn::{PixelPawn, create_pixel_pawn, create_offer, withdraw_offer, accept_offer, repay_loan, claim_nft, withdraw_balance, get_offers_size};
     use pixelpawn::nfttypes::mint_nft_1;
     use pixelpawn::nfttypes::NFT_1;
-    use pixelpawn::pixelpawn::Offer;
     use pixelpawn::pixelpawn::OwnerCap;
 
     #[test_only]
@@ -74,7 +71,7 @@ module pixelpawn::tests {
         
         // Dummy NFT object
         let nft = mint_nft_1(100, 6, scenario.ctx());
-        let mut coins = mint_for_testing<SUI>(100, scenario.ctx());
+        let coins = mint_for_testing<SUI>(100, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 100, 5, 1000, scenario.ctx());
         
@@ -101,8 +98,8 @@ module pixelpawn::tests {
         
         // Dummy NFT object
         let nft = mint_nft_1(100, 6, scenario.ctx());
-        let mut coins_lender = mint_for_testing<SUI>(100, scenario.ctx());
-        let mut coins_pawner = mint_for_testing<SUI>(100, scenario.ctx());
+        let coins_lender = mint_for_testing<SUI>(100, scenario.ctx());
+        let coins_pawner = mint_for_testing<SUI>(100, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 100, 5, 1000, scenario.ctx());
         
