@@ -12,6 +12,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loanAmount, setLoanAmount] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
+  const [interestRate, setInteresRate] = useState<number>(0);
   const image = nft.data.content.fields.image_id
     ? nft.data.content.fields.image_id
     : nft.data.content.fields.image_url;
@@ -25,15 +26,15 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
   };
 
   // Function to handle the pawn NFT action
-  const pawnNFT = (loanAmount : number, duration : number) => {
+  const pawnNFT = (loanAmount : number, duration : number, interestRate: number) => {
     const tx = new Transaction();
     tx.moveCall({
       target: `${PACKAGE_ID}::pixel_pawn::create_offer`,
       arguments: [
-        tx.pure.string(),
-        tx.object(nft),
+        
         tx.object(nft.data.objectId),
         tx.pure.u64(loanAmount),
+        tx.pure.u64(interestRate),
         tx.pure.u64(duration),
       ],
     });
@@ -163,6 +164,21 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
               />
             </div>
 
+            {/* Form Control for Interest Rate */}
+            <div className="form-control mb-6">
+              <label className="label">
+                <span className="label-text">InterestRate (%)</span>
+              </label>
+              <input
+                type="u64"
+                value={interestRate}
+                onChange={(e) => setInteresRate(Number(e.target.value))}
+                className="input input-bordered w-full"
+                placeholder="Enter interest rate in %"
+                min="1"
+              />
+            </div>
+
             {/* Action buttons */}
             <div className="flex justify-end space-x-4">
               <button
@@ -173,7 +189,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
               </button>
               <button
                 className="btn btn-primary"
-                onClick={() => pawnNFT(loanAmount, duration)}
+                onClick={() => pawnNFT(loanAmount, duration, interestRate*10000)}
               >
                 Submit
               </button>
