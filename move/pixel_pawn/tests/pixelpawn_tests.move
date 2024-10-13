@@ -12,7 +12,7 @@ module pixelpawn::tests {
     use sui::transfer;
     use sui::object::{Self as object};
     use sui::tx_context::{Self as tx_context};
-    use std::vector;
+    use std::vector::{Self, empty};
     use sui::clock;
 
     #[test_only]
@@ -56,7 +56,7 @@ module pixelpawn::tests {
         let mut pix = scenario.take_shared<PixelPawn>();
 
         // Mint NFT_2
-        let metadata_url = b"https://example.com/metadata".to_vec();
+        let metadata_url = b"https://example.com/metadata";
         let nft = mint_nft_2(@0xB, metadata_url, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 200, 7, 2000, scenario.ctx());
@@ -90,9 +90,9 @@ module pixelpawn::tests {
         let mut pix = scenario.take_shared<PixelPawn>();
 
         // Mint NFT_3
-        let attributes = vector::new<vector<u8>>();
-        vector::push_back(&mut attributes, b"Attribute1".to_vec());
-        vector::push_back(&mut attributes, b"Attribute2".to_vec());
+        let mut attributes = vector::empty<vector<u8>>();
+        vector::push_back(&mut attributes, b"Attribute1");
+        vector::push_back(&mut attributes, b"Attribute2");
         let nft = mint_nft_3(@0xC, attributes, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 300, 9, 3000, scenario.ctx());
@@ -138,7 +138,7 @@ module pixelpawn::tests {
         let clock = clock::create_for_testing(scenario.ctx());
 
         // Mint NFT_2
-        let metadata_url = b"https://example.com/metadata".to_vec();
+        let metadata_url = b"https://example.com/metadata";
         let nft = mint_nft_2(@0xA, metadata_url, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 200, 7, 2000, scenario.ctx());
@@ -168,9 +168,9 @@ module pixelpawn::tests {
         let clock = clock::create_for_testing(scenario.ctx());
 
         // Mint NFT_3
-        let attributes = vector::new<vector<u8>>();
-        vector::push_back(&mut attributes, b"Attribute1".to_vec());
-        vector::push_back(&mut attributes, b"Attribute2".to_vec());
+        let mut attributes = vector::empty<vector<u8>>();
+        vector::push_back(&mut attributes, b"Attribute1");
+        vector::push_back(&mut attributes, b"Attribute2");
         let nft = mint_nft_3(@0xC, attributes, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 300, 9, 3000, scenario.ctx());
@@ -211,7 +211,7 @@ module pixelpawn::tests {
         let clock = clock::create_for_testing(scenario.ctx());
 
         // Mint NFT_2
-        let metadata_url = b"https://example.com/metadata".to_vec();
+        let metadata_url = b"https://example.com/metadata";
         let nft = mint_nft_2(@0xA, metadata_url, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 200, 7, 2000, scenario.ctx());
@@ -245,9 +245,9 @@ module pixelpawn::tests {
         let clock = clock::create_for_testing(scenario.ctx());
 
         // Mint NFT_3
-        let attributes = vector::new<vector<u8>>();
-        vector::push_back(&mut attributes, b"Attribute1".to_vec());
-        vector::push_back(&mut attributes, b"Attribute2".to_vec());
+        let mut attributes = vector::empty<vector<u8>>();
+        vector::push_back(&mut attributes, b"Attribute1");
+        vector::push_back(&mut attributes, b"Attribute2");
         let nft = mint_nft_3(@0xC, attributes, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 300, 9, 3000, scenario.ctx());
@@ -292,7 +292,7 @@ module pixelpawn::tests {
         let mut clock = clock::create_for_testing(scenario.ctx());
 
         // Mint NFT_2
-        let metadata_url = b"https://example.com/metadata".to_vec();
+        let metadata_url = b"https://example.com/metadata";
         let nft = mint_nft_2(@0xA, metadata_url, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 200, 7, 1, scenario.ctx());
@@ -327,9 +327,9 @@ module pixelpawn::tests {
         let mut clock = clock::create_for_testing(scenario.ctx());
 
         // Mint NFT_3
-        let attributes = vector::new<vector<u8>>();
-        vector::push_back(&mut attributes, b"Attribute1".to_vec());
-        vector::push_back(&mut attributes, b"Attribute2".to_vec());
+        let mut attributes = vector::empty<vector<u8>>();
+        vector::push_back(&mut attributes, b"Attribute1");
+        vector::push_back(&mut attributes, b"Attribute2");
         let nft = mint_nft_3(@0xC, attributes, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 300, 9, 1, scenario.ctx());
@@ -375,7 +375,7 @@ module pixelpawn::tests {
         let clock = clock::create_for_testing(scenario.ctx());
 
         // Mint NFT_2
-        let metadata_url = b"https://example.com/metadata".to_vec();
+        let metadata_url = b"https://example.com/metadata";
         let nft = mint_nft_2(@0xA, metadata_url, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 200, 7, 2000, scenario.ctx());
@@ -412,9 +412,9 @@ module pixelpawn::tests {
         let clock = clock::create_for_testing(scenario.ctx());
 
         // Mint NFT_3
-        let attributes = vector::new<vector<u8>>();
-        vector::push_back(&mut attributes, b"Attribute1".to_vec());
-        vector::push_back(&mut attributes, b"Attribute2".to_vec());
+        let mut attributes = vector::empty<vector<u8>>();
+        vector::push_back(&mut attributes, b"Attribute1");
+        vector::push_back(&mut attributes, b"Attribute2");
         let nft = mint_nft_3(@0xC, attributes, scenario.ctx());
         let nft_id = object::id(&nft);
         create_offer(&mut pix, nft, 300, 9, 3000, scenario.ctx());
