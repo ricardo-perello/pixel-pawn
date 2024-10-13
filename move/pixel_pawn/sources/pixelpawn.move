@@ -29,7 +29,7 @@ module pixelpawn::pixelpawn{
     const EIncorrenctOwner: u64 = 2;
 
     const PLATFORM_RATE: u64 = 2;
-    // Struct for ChronoKiosk that will include time-locked items
+    // Struct that will include time-locked items
     public struct PixelPawn has key, store {
         id: UID,
         owner: address,
