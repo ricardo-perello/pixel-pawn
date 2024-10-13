@@ -9,10 +9,6 @@ module pixelpawn::tests {
     use pixelpawn::nfttypes::{
         mint_nft_1, mint_nft_2, mint_nft_3, NFT_1, NFT_2, NFT_3
     };
-    use sui::transfer;
-    use sui::object::{Self as object};
-    use sui::tx_context::{Self as tx_context};
-    use std::vector::{Self, empty};
     use sui::clock;
 
     #[test_only]
