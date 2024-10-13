@@ -129,7 +129,7 @@ module pixelpawn::pixelpawn{
     }
 
    #[test_only]
-    public fun get_interest_rate(offer: Offer): u64 {
+    public fun get_interest_rate(offer: &Offer): u64 {
         return offer.interest_rate
     }
 
