@@ -237,7 +237,7 @@ module pixelpawn::pixelpawn{
         assert!(current_time <= offer.timestamp + offer.duration);
 
         // Calculate repayment amount
-        let total_due = (offer.loan_amount * (100 + offer.interest_rate))/100;
+        let total_due = (offer.loan_amount * (10000 + offer.interest_rate))/10000;
         assert!(coins.value() == total_due, EIncorrenctPayment);
         let platform_fee = (total_due * PLATFORM_RATE)/100;
         
