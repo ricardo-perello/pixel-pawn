@@ -15,16 +15,13 @@ arguments: [
 /// Module: pixelpawn
 module pixelpawn::pixelpawn{
 
-    use sui::object::{UID, new}; 
+    use sui::object::{new}; 
     use sui::clock::Clock;
     use sui::dynamic_object_field as dof;
     use sui::table::{Self, Table};
-    use sui::tx_context::{Self, TxContext};
-    use sui::transfer;
     use sui::sui::SUI;
-    use sui::coin::{Self, Coin};
+    use sui::coin::{Coin};
     use sui::balance::{Self, Balance};
-    use sui::pay;
 
     // Error codes
     const EIncorrectAmount: u64 = 0;
@@ -32,7 +29,7 @@ module pixelpawn::pixelpawn{
     const EIncorrenctOwner: u64 = 2;
 
     const PLATFORM_RATE: u64 = 2;
-    // Struct for ChronoKiosk that will include time-locked items
+    // Struct that will include time-locked items
     public struct PixelPawn has key, store {
         id: UID,
         owner: address,
@@ -42,18 +39,18 @@ module pixelpawn::pixelpawn{
 
     //PixelPawn getters
     #[test_only]
-    public fun get_owner(pix: PixelPawn): address{
+    public fun get_owner(pix: &mut PixelPawn): address{
         return pix.owner
     }
     #[test_only]
-    public fun get_offers_size(pix: PixelPawn): u64{
+    public fun get_offers_size(pix: &mut PixelPawn): u64{
         return pix.offers.length()
     }
-    public fun get_offers(pix: PixelPawn, nft_id: ID): &Offer{
+    public fun get_offer(pix: PixelPawn, nft_id: ID): &Offer{
         return pix.offers.borrow(nft_id)
     }
    #[test_only]
-    public fun get_fees(pix: PixelPawn): u64{
+    public fun get_fees(pix: &mut PixelPawn): u64{
         return pix.fees.value()
     }
 
@@ -63,7 +60,7 @@ module pixelpawn::pixelpawn{
     }
 
     // Function to create a time-locked kiosk
-    public fun create_pixel_pawn(ctx: &mut TxContext) {
+    public fun create_pixel_pawn(ctx: &mut TxContext): OwnerCap {
         let id = new(ctx);
         let owner = tx_context::sender(ctx);
         let offers = table::new<ID, Offer>(ctx);
@@ -72,15 +69,15 @@ module pixelpawn::pixelpawn{
         let ownerCap = OwnerCap { id: object::new(ctx), owner };
 
         transfer::public_share_object(pix);
-        transfer::public_transfer(ownerCap, ctx.sender());
+        ownerCap
     }
 
-    fun add_nft<T: key+store>(nft: T, pix: &mut PixelPawn, ctx: &mut TxContext) {
+    fun add_nft<T: key+store>(nft: T, pix: &mut PixelPawn, _ctx: &mut TxContext) {
         let id = object::id(&nft);
         dof::add(&mut pix.id, id, nft);
     }
 
-    fun remove_nft<T: key+store>(nft_id: ID, pix: &mut PixelPawn, ctx: &mut TxContext): T {
+    fun remove_nft<T: key+store>(nft_id: ID, pix: &mut PixelPawn, _ctx: &mut TxContext): T {
         dof::remove(&mut pix.id, nft_id)
     }
 
