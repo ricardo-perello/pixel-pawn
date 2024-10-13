@@ -11,26 +11,31 @@ module pixelpawn::tests {
     use pixelpawn::pixelpawn::OwnerCap;
 
     #[test_only]
-    fun test_create_pixel_pawn(): (Scenario, OwnerCap) {
+    fun test_create_pixel_pawn(): Scenario {
         let mut scenario = ts::begin(@0xA);
         let cap = create_pixel_pawn(scenario.ctx());
-        (scenario,cap)
+        transfer::public_transfer(cap, @0xA);
+        scenario
     }
 
     #[test]
     fun check_owner(){
-        let (mut scenario, cap) = test_create_pixel_pawn();
+        let mut scenario = test_create_pixel_pawn();
         scenario.next_tx(@0xA);
+        let cap = scenario.take_from_sender<OwnerCap>();
+
         let mut pix = scenario.take_shared<PixelPawn>();
         assert!(pix.get_owner() == @0xA);
         ts::return_shared(pix);
+        scenario.return_to_sender( cap);
         scenario.end();
     }
 
     #[test]
     fun test_create_and_withdraw_offer() {
-        let (mut scenario, cap) = test_create_pixel_pawn();
+        let mut scenario = test_create_pixel_pawn();
         scenario.next_tx(@0xA);
+        let cap = scenario.take_from_sender<OwnerCap>();
         let mut pix = scenario.take_shared<PixelPawn>();
         
         // Dummy NFT object
@@ -52,13 +57,18 @@ module pixelpawn::tests {
 
         
         withdraw_offer<NFT_1>(&mut pix, nft_id, scenario.ctx());
+        
         assert!(pix.get_offers_size() == 0);
+        ts::return_shared(pix);
+        scenario.return_to_sender( cap);
+        scenario.end();
     }
 
     #[test]
     fun test_accept_offer() {
-        let (mut scenario, cap) = test_create_pixel_pawn();
+        let mut scenario = test_create_pixel_pawn();
         scenario.next_tx(@0xA);
+        let cap = scenario.take_from_sender<OwnerCap>();
         let mut pix = scenario.take_shared<PixelPawn>();
         let clock = sui::clock::create_for_testing(scenario.ctx()); // Access the Clock object
         
@@ -75,12 +85,17 @@ module pixelpawn::tests {
         assert!(offer.get_loan_status() == 1, 1);
         assert!(offer.get_lender() == tx_context::sender(scenario.ctx()), 1);
         scenario.next_tx(@0xA);
+        ts::return_shared(pix);
+        scenario.return_to_sender( cap);
+        scenario.end();
+        sui::clock::destroy_for_testing(clock);
     }
 
     #[test]
     fun test_repay_loan() {
-        let (mut scenario, cap) = test_create_pixel_pawn();
+        let mut scenario = test_create_pixel_pawn();
         scenario.next_tx(@0xA);
+        let cap = scenario.take_from_sender<OwnerCap>();
         let mut pix = scenario.take_shared<PixelPawn>();
         let clock = sui::clock::create_for_testing(scenario.ctx()); // Access the Clock object
         
@@ -97,33 +112,44 @@ module pixelpawn::tests {
         repay_loan<NFT_1>(&mut pix, nft_id, &clock, coins_pawner, scenario.ctx());
         scenario.next_tx(@0xA);
         assert!(pix.get_offers_size() == 0, 1);
+        ts::return_shared(pix);
+        scenario.return_to_sender( cap);
+        scenario.end();
+        sui::clock::destroy_for_testing(clock);
     }
 
     #[test]
     fun test_claim_nft() {
-        let (mut scenario, cap) = test_create_pixel_pawn();
+        let mut scenario= test_create_pixel_pawn();
         scenario.next_tx(@0xA);
+        let cap = scenario.take_from_sender<OwnerCap>();
         let mut pix = scenario.take_shared<PixelPawn>();
-        let clock = sui::clock::create_for_testing(scenario.ctx()); // Access the Clock object
+        let mut clock = sui::clock::create_for_testing(scenario.ctx()); // Access the Clock object
         
         // Dummy NFT object
         let nft = mint_nft_1(100, 6, scenario.ctx());
         let nft_id = object::id(&nft);
         let coins_lender = mint_for_testing<SUI>(100, scenario.ctx());
         
-        create_offer(&mut pix, nft, 100, 5, 1000, scenario.ctx());
+        create_offer(&mut pix, nft, 100, 5, 1, scenario.ctx());
         accept_offer(&mut pix, nft_id, &clock, coins_lender, scenario.ctx());
         scenario.next_tx(@0xA);
+        sui::clock::increment_for_testing(& mut clock, 2);
         claim_nft<NFT_1>(&mut pix, nft_id, &clock, scenario.ctx());
         scenario.next_tx(@0xA);
-        
+
         assert!(get_offers_size(&mut pix) == 0);
+        ts::return_shared(pix);
+        scenario.return_to_sender( cap);
+        scenario.end();
+        sui::clock::destroy_for_testing(clock);
     }
 
     #[test]
     fun test_claim_fees() {
-        let (mut scenario, cap) = test_create_pixel_pawn();
+        let mut scenario= test_create_pixel_pawn();
         scenario.next_tx(@0xA);
+        let mut cap = scenario.take_from_sender<OwnerCap>();
         let mut pix = scenario.take_shared<PixelPawn>();
         let clock = sui::clock::create_for_testing(scenario.ctx()); // Access the Clock object
 
@@ -140,6 +166,10 @@ module pixelpawn::tests {
         cap = withdraw_balance(&mut pix, cap, scenario.ctx());
         scenario.next_tx(@0xA);
         assert!(pix.get_fees() == 0);
+        ts::return_shared(pix);
+        scenario.return_to_sender( cap);
+        scenario.end();
+        sui::clock::destroy_for_testing(clock);
         
     }
 }
