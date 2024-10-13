@@ -21,6 +21,7 @@ const OfferCard = ({ offer }) => {
         tx.object(TESTNET_PIXEL_PAWN_OBJECT_ID),
         tx.object(nft_id),
       ],
+      typeArguments: [nft.data?.type!]
     });
     tx.setGasBudget(10000000);
 

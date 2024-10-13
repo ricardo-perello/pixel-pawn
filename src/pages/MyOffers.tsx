@@ -55,7 +55,7 @@ const MyOffers = () => {
           parentId: PIXEL_PAWN_OFFERS,
           name: item.name
         });
-        console.log(resp);
+        console.log("resp" , resp);
         if (resp.data?.content?.dataType === 'moveObject') {
           const offerFields = resp.data.content.fields;
         console.log("offerFields : ",offerFields);
