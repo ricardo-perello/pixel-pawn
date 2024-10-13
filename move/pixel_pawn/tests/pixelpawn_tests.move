@@ -14,8 +14,7 @@ module pixelpawn::tests {
     #[test_only]
     fun test_create_pixel_pawn(): Scenario {
         let mut scenario = ts::begin(@0xA);
-        let cap = create_pixel_pawn(scenario.ctx());
-        transfer::public_transfer(cap, @0xA);
+        create_pixel_pawn(scenario.ctx());
         scenario
     }
 
