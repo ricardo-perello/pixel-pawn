@@ -46,7 +46,7 @@ module pixelpawn::pixelpawn{
     public fun get_offers_size(pix: &mut PixelPawn): u64{
         return pix.offers.length()
     }
-    public fun get_offer(pix: PixelPawn, nft_id: ID): &Offer{
+    public fun get_offer(pix: &mut PixelPawn, nft_id: ID): &Offer{
         return pix.offers.borrow(nft_id)
     }
    #[test_only]
@@ -60,7 +60,7 @@ module pixelpawn::pixelpawn{
     }
 
     // Function to create a time-locked kiosk
-    public fun create_pixel_pawn(ctx: &mut TxContext): OwnerCap {
+    public fun create_pixel_pawn(ctx: &mut TxContext) {
         let id = new(ctx);
         let owner = tx_context::sender(ctx);
         let offers = table::new<ID, Offer>(ctx);
@@ -69,7 +69,7 @@ module pixelpawn::pixelpawn{
         let ownerCap = OwnerCap { id: object::new(ctx), owner };
 
         transfer::public_share_object(pix);
-        ownerCap
+        transfer::public_transfer(ownerCap, owner);
     }
 
     fun add_nft<T: key+store>(nft: T, pix: &mut PixelPawn, _ctx: &mut TxContext) {
