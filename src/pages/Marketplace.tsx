@@ -1,61 +1,70 @@
 // src/pages/Marketplace.tsx
 import React, { useEffect, useState } from 'react';
-import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
+import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import MarketplaceOfferCard from '../components/MarketplaceCard';
+import { PIXEL_PAWN_OFFERS } from '../constants';
 
-const Marketplace = () => {
-  const currentAccount = useCurrentAccount();
-  const suiClient = useSuiClient();
-  const [offers, setOffers] = useState([]);
-
-  useEffect(() => {
-    const fetchMarketplaceOffers = async () => {
-      try {
-        // Fetch all offers
-        const response = await suiClient.queryEvents({
-          query: {
-            MoveEventType: `${process.env.REACT_APP_PACKAGE_ID}::pixel_pawn::OfferCreated`,
-          },
-        });
-        // Process events to get offer IDs
-        const offerIds = response.data.map((event) => event.parsedJson.offer_id);
-
-        // Fetch offer objects
-        const offersData = await suiClient.multiGetObjects({
-          ids: offerIds,
-          options: {
-            showContent: true,
-          },
-        });
-
-        // Optionally filter out user's own offers
-        const filteredOffers = offersData.filter(
-          (offer) => offer.data.owner !== currentAccount?.address,
-        );
-
-        setOffers(filteredOffers);
-      } catch (error) {
-        console.error('Error fetching marketplace offers:', error);
-      }
-    };
-
-    fetchMarketplaceOffers();
-  }, [currentAccount, suiClient]);
-
+const MarketList = ({ marketOffers, address }) => {
+  console.log("offers:" ,marketOffers);
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Marketplace</h1>
-      {offers.length === 0 ? (
-        <p>No offers available at the moment.</p>
+    <div className="offer-list">
+      {marketOffers.length > 0 ? (
+        marketOffers.map((marketOffer, index) => (
+          <MarketplaceOfferCard key={index}  market={marketOffer} address = {address} />
+        ))
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {offers.map((offer) => (
-            <MarketplaceOfferCard key={offer.data.objectId} offer={offer} />
-          ))}
-        </div>
+        <p>No offers available.</p>
       )}
     </div>
   );
+};
+
+const Marketplace = () => {
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const client = useSuiClient();
+  const [marketOffers, setMarketOffers] = useState([]);
+  const account = useCurrentAccount();
+  const address = account?.address;
+
+  useEffect(() => {
+    const fetchMarketPlaceOffers = async () => {
+      const reponse = await client.getDynamicFields({
+        parentId: PIXEL_PAWN_OFFERS
+      });
+      const marketOffers = [];
+
+      for (let item of reponse.data) {
+        const resp = await client.getDynamicFieldObject({
+          parentId: PIXEL_PAWN_OFFERS,
+          name: item.name
+        });
+        console.log(resp);
+        if (resp.data?.content?.dataType === 'moveObject') {
+          const offerFields = resp.data.content.fields;
+        console.log("offerFields : ",offerFields);
+          const offerData = {
+            objectId: resp.data.objectId,
+            loan_amount : offerFields.value.fields.loan_amount ,
+            duration: offerFields.value.fields.duration,
+            interest_rate: offerFields.value.fields.interest_rate,
+            nft_id: offerFields.value.fields.nft_id,
+            pawner: offerFields.value.fields.pawner,
+            loan_status: offerFields.value.fields.loan_status,
+            lender: offerFields.value.fields.lender,
+            timestamp: offerFields.value.fields.timestamp,
+          };
+        
+          offerData.loan_status == 0 ? marketOffers.push(offerData) : null;
+          console.log("offerData loan Status: ",offerData.loan_status);
+        }
+      }
+      setMarketOffers(marketOffers);
+    };
+
+    fetchMarketPlaceOffers();
+  }, []);
+
+  return <MarketList marketOffers={marketOffers} address={address} />;
 };
 
 export default Marketplace;

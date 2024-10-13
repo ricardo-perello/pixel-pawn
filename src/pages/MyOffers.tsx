@@ -1,81 +1,95 @@
-import { useSuiClientQuery, useCurrentAccount } from '@mysten/dapp-kit';
+import { useSuiClientQuery, useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
 import Navbar from '../components/Navbar'; // Import your Navbar component
-import { PACKAGE_ID } from '../constants';
+import { PACKAGE_ID, PIXEL_PAWN_OFFERS } from '../constants';
+import  OfferCard from '../components/OfferCard';
+import LenderOfferCard from "../components/LenderOfferCard";
+import { SuiObjectResponse } from '@mysten/sui/client';
+import React, { useEffect, useState } from 'react';
 
-// Custom hook to fetch offers
-const useFetchOffers = () => {
-  const account = useCurrentAccount();
-
-  if (!account) {
-    return { data: [], isLoading: false, isError: false }; // Return empty data if no account is connected
-  }
-
-  // Query to fetch OfferPTB structs where the pawner is the connected account
-  const { data, isLoading, isError, error, refetch } = useSuiClientQuery(
-    'getOwnedObjects', // This should match your Move function name
-    {
-      owner: account.address,
-      // The filter condition is specific to your implementation
-      filter: {
-        MatchAll: [
-          {
-            StructType: `${PACKAGE_ID}::pixelpawn::Offer`, // Specify the struct type
-          },
-        ],
-      },
-      options: {
-        showContent: true,
-        showDisplay: true,
-        showType: true,
-      },
-    },
-    { queryKey: ['OffersPTB'] }, // Optional query key for caching
+const MyOfferList = ({ offers }) => {
+    console.log("offers:" ,offers);
+  return (
+    <div className="offer-list">
+      {offers.length > 0 ? (
+        offers.map((offer, index) => (
+          <OfferCard key={index} offer={offer} />
+        ))
+      ) : (
+        <p>No NFTs currently offered up.</p>
+      )}
+    </div>
   );
-
-  return {
-    data: data && data.data.length > 0 ? data.data : [], // Return the fetched data
-    isLoading,
-    isError,
-    error,
-    refetch,
-  };
 };
 
+const LenderOfferList = ({ offers }) => {
+    console.log("Lender offers:" ,offers);
+  return (
+    <div className="offer-list">
+      {offers.length > 0 ? (
+        offers.map((offer, index) => (
+          <LenderOfferCard key={index} offer={offer} />
+        ))
+      ) : (
+        <p>Not currently lending money.</p>
+      )}
+    </div>
+  );
+};
+
+
 const MyOffers = () => {
-  const { data: offers, isLoading, isError, error, refetch } = useFetchOffers();
-  
+    const client = useSuiClient();
+    const [myOffers, setOffers] = useState([]);
+    const [lenderOffers, setLenderOffers] = useState([]);
+    const account = useCurrentAccount();
+    const address = account?.address;
+  useEffect(() => {
+    const fetchOffers = async () => {
+      const reponse = await client.getDynamicFields({
+        parentId: PIXEL_PAWN_OFFERS
+      });
+      const myOffers = [];
+      const lenderOffers = [];
+      for (let item of reponse.data) {
+        const resp = await client.getDynamicFieldObject({
+          parentId: PIXEL_PAWN_OFFERS,
+          name: item.name
+        });
+        console.log(resp);
+        if (resp.data?.content?.dataType === 'moveObject') {
+          const offerFields = resp.data.content.fields;
+        console.log("offerFields : ",offerFields);
+          const offerData = {
+            objectId: resp.data.objectId,
+            loan_amount : offerFields.value.fields.loan_amount ,
+            duration: offerFields.value.fields.duration,
+            interest_rate: offerFields.value.fields.interest_rate,
+            nft_id: offerFields.value.fields.nft_id,
+            pawner: offerFields.value.fields.pawner,
+            loan_status: offerFields.value.fields.loan_status,
+            lender: offerFields.value.fields.lender,
+            timestamp: offerFields.value.fields.timestamp,
+          };
+        
+          console.log("offerData : ",offerData);
+          (address == offerData.pawner) ? myOffers.push(offerData) : null;
+          (address == offerData.lender) ? lenderOffers.push(offerData) : null;
+        }
+      }
+      setOffers(myOffers);
+      setLenderOffers(lenderOffers);
+    };
+
+    fetchOffers();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <div className="h-24"></div>
-      <main className="container mx-auto px-4 py-8 mt-8">
-        <section className="text-2xl font-bold mb-4">
-          <h2>Here are all the NFTs you have put up on offer</h2>
-        </section>
-        <section>
-          {isLoading && <p>Loading offers...</p>}
-          {isError && <p>Error fetching offers: {error.message}</p>}
-          {offers.length > 0 ? (
-            offers.map((offer) => (
-              <div key={offer.nft_id} className="offer-card p-4 border rounded mb-4">
-                <h3>NFT ID: {offer.content.fields.id}</h3>
-                <p>Pawner: {offer.pawner}</p>
-                <p>Lender: {offer.lender}</p>
-                <p>Loan Amount: {offer.loan_amount}</p>
-                <p>Interest Rate: {offer.interest_rate}%</p>
-                <p>Duration: {offer.duration} ms</p>
-                <p>Loan Status: {offer.loan_status}</p>
-                <p>Repayment Status: {offer.repayment_status}</p>
-              </div>
-            ))
-          ) : (
-            <section className= 'text-2xl font-bold mb-4'> 
-              <p>No offers found.</p>
-            </section>
-          )}
-          <button onClick={refetch} className="btn btn-secondary mt-8"> Refresh Offers</button>
-        </section>
-      </main>
+    <div>
+      <h1>Marketplace Offers</h1>
+      <MyOfferList offers={myOffers} />
+
+      <h1>Lender Offers</h1>
+      <LenderOfferList offers={lenderOffers} /> {/* Render lender offers in the same way */}
     </div>
   );
 };

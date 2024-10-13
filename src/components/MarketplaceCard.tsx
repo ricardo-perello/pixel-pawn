@@ -1,46 +1,65 @@
-// src/components/MarketplaceOfferCard.tsx
-import React from 'react';
+import { useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
-import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
+import React from 'react';
+import { PACKAGE_ID, TESTNET_PIXEL_PAWN_OBJECT_ID } from '../constants';
+import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 
-const MarketplaceOfferCard = ({ offer }) => {
+const MarketplaceOfferCard = ({ market }, { address }) => {
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
-  const suiClient = useSuiClient();
+  const client = useSuiClient();
 
-  const fundOffer = () => {
-    const tx = new Transaction();
-    tx.moveCall({
-      target: `${process.env.REACT_APP_PACKAGE_ID}::pixel_pawn::fund_offer`,
-      arguments: [tx.object(offer.data.objectId)],
-      // You may need to include payment for the loan amount
-    });
-
-    signAndExecute(
-      {
-        transaction: tx,
-      },
-      {
-        onSuccess: (result) => {
-          console.log('Offer funded successfully:', result);
+  const acceptOffer = async (nft_id, loan_amount) => {
+    const tx = new Transaction(); 
+    const nft = await client.getObject({
+        id: nft_id,
+        options: {
+          showType: true,
         },
-        onError: (error) => {
-          console.error('Error funding offer:', error);
+      });
+      const coin = tx.splitCoins(tx.gas, [tx.pure.u64(loan_amount)]);
+      tx.moveCall({
+        target: `${PACKAGE_ID}::pixelpawn::accept_offer`,
+        arguments: [
+          tx.object(TESTNET_PIXEL_PAWN_OBJECT_ID),
+          tx.object(nft_id),
+          tx.object('0x6'),
+          coin
+        ],
+        typeArguments: [nft.data?.type!],
+      });
+      tx.setGasBudget(10000000);
+      signAndExecute(
+        {
+          transaction: tx,
         },
-      },
-    );
-  };
+        {
+          onSuccess: (result) => {
+            console.log('Offer accepted successfully:', result);
+          },
+          onError: (error) => {
+            console.error('Error accepting offer:', error);
+          },
+        }
+      );
+  }
+  if (!market) {
+    return <p>No offer data available</p>; // Add a fallback if market is undefined
+  }
 
+  const { objectId, loan_amount, duration, interest_rate, nft_id, loan_status, pawner } = market;
   return (
-    <div className="card bg-base-100 shadow-xl">
+    <div className="card bg-base-200 shadow-xl min-w-full min-h-[300px] p-8 m-6">
       <div className="card-body">
-        <h2 className="card-title">Offer ID: {offer.data.objectId}</h2>
-        {/* Display offer details like loan amount, duration, etc. */}
-        <p>Loan Amount: {offer.data.content.fields.loan_amount}</p>
-        <p>Duration: {offer.data.content.fields.duration}</p>
-        <div className="card-actions justify-end">
-          <button className="btn btn-primary" onClick={fundOffer}>
-            Fund Offer
-          </button>
+        <h2 className="card-title text-xl mb-4">Offer ID: {objectId}</h2>
+        <p className="text-lg mb-2">Loan Amount: {loan_amount}</p>
+        <p className="text-lg mb-2">Duration: {duration}</p>
+        <p className="text-lg mb-2">Interest Rate: {interest_rate / 10000}</p>
+        <p className="text-lg mb-2">NFT ID: {nft_id}</p>
+        <p className="text-lg mb-4">
+          Loan Status: {loan_status === 0 ? 'On Marketplace' : 'Accepted'}
+        </p>
+        <div className="card-actions justify-end space-x-4">
+        <button className="btn btn-secondary" onClick={() => acceptOffer(nft_id, loan_amount)}>Accept Offer</button>
         </div>
       </div>
     </div>
