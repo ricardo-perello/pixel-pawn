@@ -42,19 +42,19 @@ module pixelpawn::pixelpawn{
 
     //PixelPawn getters
     #[test_only]
-    public fun get_owner(pix: PixelPawn): address{
+    public fun get_owner(pix: &mut PixelPawn): address{
         return pix.owner
     }
     #[test_only]
-    public fun get_offers_size(pix: PixelPawn): u64{
+    public fun get_offers_size(pix: &mut PixelPawn): u64{
         return pix.offers.length()
     }
    #[test_only]
-    public fun get_offer(pix: PixelPawn, nft_id: ID): &Offer{
+    public fun get_offer(pix: &mut PixelPawn, nft_id: ID): &Offer{
         return pix.offers.borrow(nft_id)
     }
    #[test_only]
-    public fun get_fees(pix: PixelPawn): u64{
+    public fun get_fees(pix: &mut PixelPawn): u64{
         return pix.fees.value()
     }
 
