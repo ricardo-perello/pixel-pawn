@@ -105,9 +105,11 @@ module pixelpawn::tests {
         let nft_id = object::id(&nft);
         let coins_lender = mint_for_testing<SUI>(100, scenario.ctx());
         
-        create_offer(&mut pix, nft, 100, 5, 1000, scenario.ctx());    
+        create_offer(&mut pix, nft, 100, 5, 1000, scenario.ctx());
         accept_offer(&mut pix, nft_id, &clock, coins_lender, scenario.ctx());
+        scenario.next_tx(@0xA);
         claim_nft<NFT_1>(&mut pix, nft_id, &clock, scenario.ctx());
+        scenario.next_tx(@0xA);
         assert!(get_offers_size(pix) == 0);
     }
 
